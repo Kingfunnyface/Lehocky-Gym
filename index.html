@@ -88,7 +88,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .day-btn{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:.12rem .2rem;text-align:center;cursor:pointer;transition:all .12s}
 .day-btn:hover:not(.rest-d){border-color:#555}
 .day-btn.active-d{border-color:var(--accent);background:rgba(232,255,0,.06)}
-.day-btn.rest-d{opacity:.3;cursor:default}
+.day-btn.rest-d{opacity:.45;}
 .day-btn.skip-d{border-color:rgba(255,77,28,.4)}
 .day-btn.today-d .dl{color:var(--accent)}
 .dl{font-family:'Bebas Neue',sans-serif;font-size:.88rem;letter-spacing:1px;color:#aaa;display:block}
@@ -260,6 +260,47 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
       <div class="phase-row"><div class="phase-dot" style="background:var(--p-color)"></div><div class="phase-name" style="color:var(--p-color)">Peak</div><div class="phase-weeks">Wk 9–12</div><div class="phase-bar-wrap"><div class="phase-bar-fill" id="pBar" style="background:var(--p-color);width:0%"></div></div></div>
     </div>
     <div class="phase-info-box"><div class="pib-label">Current Phase</div><div class="pib-title" id="cpiTitle">Foundation</div><div class="pib-desc" id="cpiDesc">Establishing movement patterns and baseline fitness.</div></div>
+  </div>
+  <div class="drawer-section">
+    <div class="drawer-section-title">Program Settings</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.75rem .85rem;display:flex;flex-direction:column;gap:.6rem">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;color:#fff">Program Start Date</div>
+      <div style="display:flex;gap:.4rem">
+        <select id="startMonth" style="flex:1;background:var(--surface);border:1px solid var(--border);color:#fff;padding:8px 6px;border-radius:5px;font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:600">
+          <option value="">Month</option>
+          <option value="01">January</option><option value="02">February</option>
+          <option value="03">March</option><option value="04">April</option>
+          <option value="05">May</option><option value="06">June</option>
+          <option value="07">July</option><option value="08">August</option>
+          <option value="09">September</option><option value="10">October</option>
+          <option value="11">November</option><option value="12">December</option>
+        </select>
+        <select id="startDay" style="flex:1;background:var(--surface);border:1px solid var(--border);color:#fff;padding:8px 6px;border-radius:5px;font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:600">
+          <option value="">Day</option>
+          <option value="01">1</option><option value="02">2</option><option value="03">3</option>
+          <option value="04">4</option><option value="05">5</option><option value="06">6</option>
+          <option value="07">7</option><option value="08">8</option><option value="09">9</option>
+          <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+          <option value="13">13</option><option value="14">14</option><option value="15">15</option>
+          <option value="16">16</option><option value="17">17</option><option value="18">18</option>
+          <option value="19">19</option><option value="20">20</option><option value="21">21</option>
+          <option value="22">22</option><option value="23">23</option><option value="24">24</option>
+          <option value="25">25</option><option value="26">26</option><option value="27">27</option>
+          <option value="28">28</option><option value="29">29</option><option value="30">30</option>
+          <option value="31">31</option>
+        </select>
+        <select id="startYear" style="flex:1;background:var(--surface);border:1px solid var(--border);color:#fff;padding:8px 6px;border-radius:5px;font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:600">
+          <option value="">Year</option>
+          <option value="2025">2025</option>
+          <option value="2026">2026</option>
+          <option value="2027">2027</option>
+        </select>
+      </div>
+      <div id="currentStartDisplay" style="font-size:.72rem;color:#888;font-family:'Barlow Condensed',sans-serif"></div>
+    </div>
+    <button class="drawer-btn" onclick="saveStartDate()" style="border-color:var(--accent);color:var(--accent);font-size:.95rem;padding:.65rem">💾 SAVE START DATE</button>
+    <button class="drawer-btn" id="startProgramBtn" onclick="startProgramToday()" style="font-size:.95rem;padding:.65rem">🚀 START PROGRAM TODAY (Week 1)</button>
+    <button class="drawer-btn" onclick="resetProgram()" style="border-color:var(--hot);color:var(--hot);font-size:.95rem;padding:.65rem">↺ RESET PROGRAM TO WEEK 1</button>
   </div>
   <div class="drawer-section">
     <div class="drawer-section-title">Workout Controls</div>
@@ -645,7 +686,109 @@ const TITLE_MAP={Mon:'UPPER STRENGTH',Tue:'LOWER STRENGTH',Thu:'UPPER CONDITIONI
 
 
 
-let state={week:1,day:null,deload:false,skipped:{},done:{}};
+// ── LOCALSTORAGE PERSISTENCE ──────────────────────────────────────────────────
+function loadState() {
+  try {
+    var saved = localStorage.getItem('lehocky_state');
+    if(saved) return JSON.parse(saved);
+  } catch(e) {}
+  return null;
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('lehocky_state', JSON.stringify({
+      week: state.week,
+      deload: state.deload,
+      skipped: state.skipped,
+      done: state.done,
+      programStart: state.programStart
+    }));
+  } catch(e) {}
+}
+
+function getWeekFromStart(startDateStr) {
+  if(!startDateStr) return 1;
+  var start = new Date(startDateStr);
+  var now = new Date();
+  var diff = Math.floor((now - start) / (7*24*3600*1000));
+  return Math.min(Math.max(1, diff+1), 12);
+}
+
+function saveStartDate() {
+  var m = document.getElementById('startMonth').value;
+  var d = document.getElementById('startDay').value;
+  var y = document.getElementById('startYear').value;
+  if(!m || !d || !y) { alert('Please select Month, Day, and Year.'); return; }
+  var val = y + '-' + m + '-' + d;
+  state.programStart = val;
+  state.week = getWeekFromStart(val);
+  saveState();
+  renderAll();
+  var disp = document.getElementById('currentStartDisplay');
+  if(disp) disp.textContent = 'Saved. You are on Week ' + state.week + ' of 12.';
+  alert('Start date saved! You are on Week ' + state.week + '.');
+}
+
+function resetProgram() {
+  state.programStart = null;
+  state.week = 1;
+  state.done = {};
+  state.skipped = {};
+  state.deload = false;
+  try { localStorage.removeItem('lehocky_state'); } catch(e) {}
+  saveState();
+  // Reset dropdowns
+  var sm = document.getElementById('startMonth');
+  var sd = document.getElementById('startDay');
+  var sy = document.getElementById('startYear');
+  if(sm) sm.value = '';
+  if(sd) sd.value = '';
+  if(sy) sy.value = '';
+  var disp = document.getElementById('currentStartDisplay');
+  if(disp) disp.textContent = 'Program reset to Week 1.';
+  renderAll();
+  alert('Program reset to Week 1. All progress cleared.');
+}
+
+function startProgramToday() {
+  var today = new Date();
+  var yyyy = today.getFullYear().toString();
+  var mm = String(today.getMonth()+1).padStart(2,'0');
+  var dd = String(today.getDate()).padStart(2,'0');
+  var dateStr = yyyy+'-'+mm+'-'+dd;
+  // Set dropdowns
+  var sm = document.getElementById('startMonth');
+  var sd = document.getElementById('startDay');
+  var sy = document.getElementById('startYear');
+  if(sm) sm.value = mm;
+  if(sd) sd.value = dd;
+  if(sy) sy.value = yyyy;
+  state.programStart = dateStr;
+  state.week = 1;
+  state.done = {};
+  state.skipped = {};
+  saveState();
+  renderAll();
+  var disp = document.getElementById('currentStartDisplay');
+  if(disp) disp.textContent = 'Started today. You are on Week 1.';
+  alert('Program started today. You are on Week 1!');
+}
+
+function resetProgram() {
+  if(!confirm('Reset entire program back to Week 1? All progress will be cleared.')) return;
+  state.programStart = null;
+  state.week = 1;
+  state.done = {};
+  state.skipped = {};
+  state.deload = false;
+  saveState();
+  try { localStorage.removeItem('lehocky_state'); } catch(e) {}
+  renderAll();
+  closeSettings();
+}
+
+var state = {week:1, day:null, deload:false, skipped:{}, done:{}, programStart:null};
 
 function getToday(){return JS_TO_KEY[new Date().getDay()];}
 function getAutoWeek(){return Math.min(Math.max(1,Math.floor((new Date()-PROGRAM_START)/(7*24*3600*1000))+1),12);}
@@ -783,23 +926,31 @@ function renderWeekStrip(){
       '<span class="wp" style="color:'+(isAct?phColors[ph]:'var(--muted)')+'">'+['F','B','P'][ph]+'</span>'+
       '<div class="wi"><div class="wf" style="width:'+pct+'%;background:'+phColors[ph]+'"></div></div></div>';
   }).join('');
-  strip.querySelectorAll('.wk').forEach(function(el){el.addEventListener('click',function(){state.week=parseInt(el.dataset.w);renderAll();});});
+  strip.querySelectorAll('.wk').forEach(function(el){el.addEventListener('click',function(){state.week=parseInt(el.dataset.w);saveState();renderAll();});});
 }
 
 function renderDayNav(){
-  const today=getToday(),nav=document.getElementById('dayNav'),now=new Date(),todayIdx=now.getDay();
-  const typeMap={Mon:'Upper Str',Tue:'Lower Str',Thu:'Upper Cond',Fri:'Lower MetCon'};
+  var today=getToday(),nav=document.getElementById('dayNav'),now=new Date(),todayIdx=now.getDay();
+  var typeMap={Mon:'Upper Str',Tue:'Lower Str',Thu:'Upper Cond',Fri:'Lower MetCon'};
   nav.innerHTML=DAYS_ORDER.map(function(key){
-    const isRest=REST_DAYS.includes(key),isAct=key===state.day;
-    const isSkip=state.skipped[state.week+'-'+key],isTodayKey=key===today;
-    const dayIdx=JS_TO_KEY.indexOf(key),d=new Date(now);
+    var isRest=REST_DAYS.includes(key),isAct=key===state.day;
+    var isSkip=state.skipped[state.week+'-'+key],isTodayKey=key===today;
+    var dayIdx=JS_TO_KEY.indexOf(key),d=new Date(now);
     d.setDate(now.getDate()+(dayIdx-todayIdx));
+    var todayDot=isTodayKey?'<span style="display:block;width:5px;height:5px;border-radius:50%;background:var(--accent);margin:.5px auto 0"></span>':'';
+    var typeLabel=isRest?'Rest Day':(isSkip?'Skipped':(typeMap[key]||'Off'));
     return '<div class="day-btn'+(isAct?' active-d':'')+(isRest?' rest-d':'')+(isSkip?' skip-d':'')+(isTodayKey?' today-d':'')+'" data-day="'+key+'">'+
       '<span class="dl">'+key.toUpperCase()+'</span>'+
       '<span class="dt">'+d.getDate()+'</span>'+
-      '<span class="dtype">'+(isRest?'Rest':(isSkip?'Skipped':(typeMap[key]||'')))+'</span></div>';
+      '<span class="dtype">'+typeLabel+'</span>'+
+      todayDot+
+    '</div>';
   }).join('');
-  nav.querySelectorAll('.day-btn:not(.rest-d)').forEach(function(el){el.addEventListener('click',function(){state.day=el.dataset.day;renderDayNav();renderWorkout();});});
+  nav.querySelectorAll('.day-btn').forEach(function(el){
+    el.addEventListener('click',function(){
+      state.day=el.dataset.day;saveState();renderDayNav();renderWorkout();
+    });
+  });
 }
 
 function renderPhase(){
@@ -820,15 +971,20 @@ function renderPhase(){
   document.getElementById('skipBtn').textContent=state.skipped[skipKey]?'Undo Skip Today':'Skip Today';
 }
 
-function toggleSkip(){const k=state.week+'-'+state.day;state.skipped[k]=!state.skipped[k];renderAll();}
-function resetWorkout(){const dk=state.week+'-'+state.day;state.done[dk]={};renderWorkout();}
-function toggleDeload(){state.deload=!state.deload;renderAll();}
+function toggleSkip(){const k=state.week+'-'+state.day;state.skipped[k]=!state.skipped[k];saveState();renderAll();}
+function resetWorkout(){const dk=state.week+'-'+state.day;state.done[dk]={};saveState();renderWorkout();}
+function toggleDeload(){state.deload=!state.deload;saveState();renderAll();}
 
 function renderWorkout(){
   const area=document.getElementById('workoutPanel');
   const week=state.week,day=state.day,deload=state.deload;
   if(REST_DAYS.includes(day)){
-    area.innerHTML='<div class="rest-screen"><div class="rest-big">REST DAY</div><div class="rest-msg">Recovery is part of the program. Sleep well, eat well, come back stronger.</div></div>';
+    var nextDay={Wed:'Thursday',Sat:'Monday',Sun:'Monday'}[day]||'next training day';
+    area.innerHTML='<div class="rest-screen">'+
+      '<div class="rest-big">REST DAY</div>'+
+      '<div class="rest-msg">Recovery is part of the program. Sleep well, eat well, and come back strong.</div>'+
+      '<div style="margin-top:1rem;font-family:Barlow Condensed,sans-serif;font-size:.9rem;letter-spacing:2px;color:var(--accent);text-transform:uppercase">Next training day: '+nextDay+'</div>'+
+    '</div>';
     return;
   }
   const ph=getPhase(week),sub=getPhSub(week),phk=phKey(week);
@@ -883,6 +1039,7 @@ function renderWorkout(){
       var k=el.dataset.key,dk=el.dataset.dkey;
       if(!state.done[dk])state.done[dk]={};
       state.done[dk][k]=!state.done[dk][k];
+      saveState();
       renderWorkout();
     });
   });
@@ -1075,13 +1232,39 @@ function toggleMetconDone(btn){
   var dk=btn.dataset.dkey;
   if(!state.done[dk])state.done[dk]={};
   state.done[dk]['metcon_done']=!state.done[dk]['metcon_done'];
+  saveState();
   renderWorkout();
 }
 function renderAll(){renderWeekStrip();renderDayNav();renderPhase();renderWorkout();}
 function init(){
-  var today=getToday();
-  state.week=getAutoWeek();
-  state.day=REST_DAYS.includes(today)?'Mon':today;
+  // Load saved state from localStorage
+  var saved = loadState();
+  if(saved) {
+    state.week = saved.week || 1;
+    state.deload = saved.deload || false;
+    state.skipped = saved.skipped || {};
+    state.done = saved.done || {};
+    state.programStart = saved.programStart || null;
+    // Recalculate week from start date if set
+    if(state.programStart) {
+      state.week = getWeekFromStart(state.programStart);
+    }
+  }
+  // Always auto-jump to today's day
+  var today = getToday();
+  state.day = today; // includes rest days — show rest day screen
+  // Update start date dropdowns if set
+  if(state.programStart) {
+    var parts = state.programStart.split('-');
+    var sm = document.getElementById('startMonth');
+    var sd = document.getElementById('startDay');
+    var sy = document.getElementById('startYear');
+    if(sm && parts[1]) sm.value = parts[1];
+    if(sd && parts[2]) sd.value = parts[2];
+    if(sy && parts[0]) sy.value = parts[0];
+    var disp = document.getElementById('currentStartDisplay');
+    if(disp) disp.textContent = 'Current: Week ' + state.week + ' of 12';
+  }
   renderAll();
 }
 init();
