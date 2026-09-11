@@ -199,6 +199,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .go-overlay.show{opacity:1}
 .go-text{font-family:'Bebas Neue',sans-serif;font-size:10rem;letter-spacing:8px;color:var(--accent);text-shadow:0 0 80px rgba(232,255,0,.4)}
 
+/* COIN */
+.coin-scene{perspective:900px;width:280px;height:280px;flex-shrink:0}
+.coin{width:280px;height:280px;position:relative;transform-style:preserve-3d;animation:coinSpin 2.2s linear infinite;border-radius:50%}
+@keyframes coinSpin{0%{transform:rotateY(0deg)}100%{transform:rotateY(360deg)}}
+.coin-face{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
+.coin-front{box-shadow:0 0 50px rgba(232,255,0,.35)}
+.coin-back{transform:rotateY(180deg);box-shadow:0 0 50px rgba(232,255,0,.35)}
+
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 </style>
@@ -225,15 +233,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
     </div>
   </div>
 </div>
-<style>
-.coin-scene{perspective:900px;width:280px;height:280px;flex-shrink:0}
-.coin{width:280px;height:280px;position:relative;transform-style:preserve-3d;animation:coinSpin 2.2s linear infinite;border-radius:50%}
-@keyframes coinSpin{0%{transform:rotateY(0deg)}100%{transform:rotateY(360deg)}}
-.coin-face{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
-.coin-front{box-shadow:0 0 50px rgba(232,255,0,.35)}
-.coin-back{transform:rotateY(180deg);box-shadow:0 0 50px rgba(232,255,0,.35)}
-</style>
-
 <!-- SETTINGS DRAWER -->
 <div class="settings-drawer" id="settingsDrawer">
   <div class="drawer-header">
@@ -403,19 +402,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="cfg-row" id="cfgRoundsRow" style="display:none">
           <label>Rounds</label>
-          <input class="cfg-input" type="number" id="cfgRounds" value="4" min="1" max="30">
+          <input class="cfg-input" type="number" id="cfgRounds" value="4" min="1" max="30" onchange="updateTimerConfig()">
         </div>
         <div class="cfg-row" id="cfgWorkRow" style="display:none">
           <label>Work (sec)</label>
-          <input class="cfg-input" type="number" id="cfgWork" value="20" min="5" max="60">
+          <input class="cfg-input" type="number" id="cfgWork" value="20" min="5" max="60" onchange="updateTimerConfig()">
         </div>
         <div class="cfg-row" id="cfgRestRow" style="display:none">
           <label>Rest (sec)</label>
-          <input class="cfg-input" type="number" id="cfgRest" value="10" min="5" max="60">
+          <input class="cfg-input" type="number" id="cfgRest" value="10" min="5" max="60" onchange="updateTimerConfig()">
         </div>
         <div class="cfg-row" id="cfgSetsRow" style="display:none">
           <label>Sets</label>
-          <input class="cfg-input" type="number" id="cfgSets" value="8" min="1" max="20">
+          <input class="cfg-input" type="number" id="cfgSets" value="8" min="1" max="20" onchange="updateTimerConfig()">
         </div>
       </div>
       <button class="end-workout-btn" onclick="triggerEndWorkout()">🏆 END WORKOUT</button>
@@ -457,7 +456,7 @@ const HYROX_PROGRAM = {
   "P1W5": {
     "Mon": ["HYROX Foundation", "fortime", 0, ["For Time", "30-20-10 Cal Ski (gym day)", "30-20-10 HR Push Ups", "30-20-10 DB Push Press", "30-20-10 Goblet Squat"], "Modify push ups as needed. Choose DB weight where you have to break the set of 30."],
     "Tue": ["HYROX Engine", "amrap", 4, ["5 x 4 Min AMRAP (4:00 on / 2:00 off)", "200m Run", "12 Single DB Thruster", "Max Cal Bike"], "Each round builds to 90% effort. Thrusters unbroken. Score = total cals across all rounds."],
-    "Wed": ["HYROX Aerobic", "emom", 3, ["E3MOM for 4000m Row", "Every 3 min stop and do 3 Burpees Over Rower", "Continue until 4000m complete"], "Start at 0:00. Row continuously but stop every 3 min for burpees."],
+    "Wed": ["HYROX Aerobic", "fortime", 0, ["E3MOM for 4000m Row", "Every 3 min stop and do 3 Burpees Over Rower", "Continue until 4000m complete"], "Start at 0:00. Row continuously but stop every 3 min for burpees."],
     "Thu": ["HYROX Engine", "fortime", 0, ["4 x 400m Run at Race Pace", "2:00 Rest after each"], "Record each 400m split. Find pace you can maintain without leaving anything in the tank."],
     "Fri": ["HYROX Complete", "fortime", 0, ["For Time", "1000m Row/Ski \u2014 Buy In (done once)", "4 Rounds:", "100ft Sandbag Lunge", "15 Wall Balls (14/10 lbs)", "400m Run", "75/50 Cal Bike \u2014 Cash Out (done once)", "*Accumulate 100m Sled Push throughout 4 rounds"], "1000m buy in once at start. 75/50 cal bike cash out once at end. Sled push broken up any way."],
   },
@@ -465,28 +464,28 @@ const HYROX_PROGRAM = {
     "Mon": ["HYROX Foundation", "rft", 3, ["100m Farmer Carry (53/35 lbs x2)", "15 KB Swing (53/35 lbs)", "30 Goblet Squat (53/35 lbs)", "400m Ski or Row"], "Same KB weight throughout. Farmer carry should require 1-2 breaks."],
     "Tue": ["HYROX Engine", "emom", 20, ["20 Min Alt EMOM (50 sec on / 10 sec off)", "Min 1: Goblet Lunge (53/35 lbs)", "Min 2: Push Ups / Ring Rows", "Min 3: 200m Run", "Min 4: Rest"], "Work 50 sec, 10 sec to transition. Alternate movements each minute."],
     "Wed": ["HYROX Aerobic", "fortime", 0, ["60 Min Run", "Include 2 x 10 Min Pickups at any point"], "Pickups at lactate threshold \u2014 pace just below discomfort. Walk as needed."],
-    "Thu": ["HYROX Engine", "emom", 0, ["3 Rounds \u2014 1:00 on / 1:00 off per station", "Sled Push", "Sled Pull", "Box Step Over", "DB Thruster (35/20 lbs x2)", "Push Ups"], "Work hard the full minute at each station. 1 min rest between stations."],
+    "Thu": ["HYROX Engine", "emom", 30, ["3 Rounds \u2014 1:00 on / 1:00 off per station", "Sled Push", "Sled Pull", "Box Step Over", "DB Thruster (35/20 lbs x2)", "Push Ups"], "Work hard the full minute at each station. 1 min rest between stations."],
     "Fri": ["HYROX Complete", "fortime", 0, ["For Time", "100/75 Cal Bike or Ski", "100 Goblet Squat (53/35 lbs)", "1 Mile Run", "100 KB Swing (53/35 lbs)", "100/75 Cal Bike or Ski", "50 Wall Balls (14/10 lbs)", "*Every break = 100m Farmer Carry (53/35 lbs x2)"], "Every time you put KB/ball down = 100m farmer carry penalty. Applies to goblet squats, KB swings, wall balls."],
   },
   "P1W7": {
     "Mon": ["HYROX Foundation", "fortime", 0, ["For Time \u2014 4 Rounds", "30-25-20-15 KB Deadlift (53/35 lbs)", "30-25-20-15 Goblet Lunge (53/35 lbs)", "30-25-20-15 Wall Ball (14/10 lbs)", "100m Farmer Carry after each round (53/35 lbs x2)"], "Same weight for KB deadlift and farmer carry. Prioritize depth on wall ball over height."],
     "Tue": ["HYROX Engine", "amrap", 3, ["5 x 3 Min AMRAP (3:00 on / 3:00 off)", "10 DB Thruster (35/20 lbs x2)", "6 Burpee Broad Jump", "Max Cal Bike"], "Thrusters in one set. Sprint effort each round. Score = cals, stay consistent."],
     "Wed": ["HYROX Engine", "fortime", 0, ["4 x 800m Run at Race Pace", "2:00 Rest after each"], "Record each 800m split. Note where pace changes."],
-    "Thu": ["HYROX Foundation", "amrap", 0, ["0:00-12:00 AMRAP:", "15 Wall Balls (14/10 lbs)", "12 DB Push Press (53/35 lbs x2)", "9 Cal Ski (gym day)", "---", "12:00-22:00 AMRAP:", "50ft Sled Push (AHAP)", "200m Run", "---", "22:00-30:00 AMRAP:", "8 KB Swing (53/35 lbs)", "10 Burpees"], "Each AMRAP flows immediately into next. Sled AHAP. Focus on going straight from sled to run."],
+    "Thu": ["HYROX Foundation", "amrap", 30, ["0:00-12:00 AMRAP:", "15 Wall Balls (14/10 lbs)", "12 DB Push Press (53/35 lbs x2)", "9 Cal Ski (gym day)", "---", "12:00-22:00 AMRAP:", "50ft Sled Push (AHAP)", "200m Run", "---", "22:00-30:00 AMRAP:", "8 KB Swing (53/35 lbs)", "10 Burpees"], "Each AMRAP flows immediately into next. Sled AHAP. Focus on going straight from sled to run."],
     "Fri": ["HYROX Complete", "fortime", 0, ["Part 1 \u2014 3 Rounds:", "20/12 Cal Bike", "100ft Sled Push (AHAP)", "50ft Burpee Broad Jump", "400m Run", "---", "Part 2 \u2014 3 Rounds:", "20/12 Cal Ski (gym day)", "20 KB Deadlift (53/35 lbs x2)", "100m Farmer Carry (53/35 lbs x2)", "20 Wall Balls (14/10 lbs)"], "Steady pace on BBJ. Recover on run as needed. KB deadlift and farmer carry same weight."],
   },
   "P1W8": {
     "Mon": ["HYROX Foundation", "rft", 4, ["50ft Sled Pull", "10 Push Ups", "12 DB Push Press (35/20 lbs x2)", "15 Wall Balls (14/10 lbs)", "200m Ski (gym day)"], "Practice both walk-back and arms-only sled pull. Wall balls unbroken."],
-    "Tue": ["HYROX Engine", "emom", 2, ["E2MOM x 8 Rounds", "50ft Sled Push", "200m Sprint", "Rest in remaining time"], "Focus on running immediately after sled. Adjust run distance if under 45 sec rest."],
+    "Tue": ["HYROX Engine", "emom", 16, ["E2MOM x 8 Rounds", "50ft Sled Push", "200m Sprint", "Rest in remaining time"], "Focus on running immediately after sled. Adjust run distance if under 45 sec rest."],
     "Wed": ["HYROX Engine", "fortime", 0, ["6 x 400m Run", "2:00 Rest after each"], "Push the pace. Track splits. Find where you fall off."],
-    "Thu": ["HYROX Engine", "emom", 4, ["Every 4:00 x 5 Rounds", "20 Wall Balls", "200m Sprint", "Rest in remaining time"], "Speed focus. Wall balls unbroken. No rest between wall balls and sprint."],
+    "Thu": ["HYROX Engine", "emom", 20, ["Every 4:00 x 5 Rounds", "20 Wall Balls", "200m Sprint", "Rest in remaining time"], "Speed focus. Wall balls unbroken. No rest between wall balls and sprint."],
     "Fri": ["HYROX Complete", "rft", 3, ["500m Ski (gym day) or Row", "100ft Goblet Lunge (53/35 lbs)", "100m Farmer Carry (53/35 lbs x2)", "1000m Run", "*Accumulate 100m Sled Push or Pull throughout"], "Pace yourself. Sled work broken up across rounds as long as total distance is reached."],
   },
   "P1W9": {
     "Mon": ["HYROX Engine", "fortime", 0, ["5 Rounds \u2014 2:00 Rest between each", "Round 1: 500m Run + 500m Ski (gym day)", "Round 2: 500m Run + 30 Burpee Broad Jumps", "Round 3: 500m Run + 200m Farmer Carry (53/35 lbs x2)", "Round 4: 500m Run + 50 Sandbag Lunge", "Round 5: 500m Run + 75 Wall Balls (14/10 lbs)"], "Focus on run pace. Each run = race pace effort. Take splits on all runs."],
     "Tue": ["HYROX Foundation", "fortime", 0, ["For Time \u2014 Descending", "25-20-15-10-5 Cal Ski (gym day)", "25-20-15-10-5 Goblet Lunge (53/35 lbs)", "25-20-15-10-5 DB Push Press (35/20 lbs x2)", "25-20-15-10-5 DB Front Squat (35/20 lbs x2)"], "Steady pace. Break up DB movements as needed."],
     "Wed": ["HYROX Engine", "fortime", 0, ["8 x 200m Run Max Effort", "1:30 Rest after each"], "Build to sprint. 80% for first 100m, sprint the second. Record splits."],
-    "Thu": ["HYROX Engine", "emom", 5, ["Every 5:00 x 6 Rounds", "10/8 Cal Bike", "50ft Sled Push", "200m Run", "Rest in remaining time"], "Focus on running immediately after sled. Legs will feel compromised \u2014 push through."],
+    "Thu": ["HYROX Engine", "emom", 30, ["Every 5:00 x 6 Rounds", "10/8 Cal Bike", "50ft Sled Push", "200m Run", "Rest in remaining time"], "Focus on running immediately after sled. Legs will feel compromised \u2014 push through."],
     "Fri": ["HYROX Complete", "fortime", 0, ["For Time \u2014 3 Rounds", "30-20-10 Cal Bike", "30-20-10 Wall Balls (14/10 lbs)", "30-20-10 Weighted Walking Lunge", "30-20-10 DB Push Press", "*800m Run after each round"], "Steady pace. Record 800m splits to track variance per round."],
   },
   "P1W10": {
@@ -541,7 +540,7 @@ const HYROX_PROGRAM = {
   "P2W5": {
     "Mon": ["HYROX Foundation", "fortime", 0, ["For Time \u2014 Descending", "30-25-20-15-10 Cal Ski (gym day)", "30-25-20-15-10 HR Push Ups", "30-25-20-15-10 DB Push Press", "30-25-20-15-10 KB Deadlift"], "Push ups strict with hand release. Option to go heavier on KB deadlift. Expect to break sets."],
     "Tue": ["HYROX Engine", "amrap", 4, ["5 x 4 Min AMRAP (4:00 on / 2:00 off)", "400m Run", "12 Headcutters (53/35 lbs)", "Max Cal Bike"], "Each round 90% effort. Headcutters unbroken. Score = total cals."],
-    "Wed": ["HYROX Aerobic", "emom", 2, ["5000m Row", "E2MOM: Every 2 min stop for 5 Burpees Over Rower", "Continue until 5000m complete"], "Start at 0:00. Row continuously, stop every 2 min for burpees. Stay consistent."],
+    "Wed": ["HYROX Aerobic", "fortime", 0, ["5000m Row", "E2MOM: Every 2 min stop for 5 Burpees Over Rower", "Continue until 5000m complete"], "Start at 0:00. Row continuously, stop every 2 min for burpees. Stay consistent."],
     "Thu": ["HYROX Engine", "fortime", 0, ["6 x 400m Run at Race Pace", "2:00 Rest after each"], "Record each 400m split. Find pace you can maintain without leaving anything in tank."],
     "Fri": ["HYROX Complete", "fortime", 0, ["For Time", "1000m Row/Ski \u2014 Buy In (done once)", "4 Rounds:", "150ft Sandbag Lunge", "25 Wall Balls (14/10 lbs)", "400m Run", "100/75 Cal Bike \u2014 Cash Out (done once)", "*Accumulate 100m Sled Push throughout 4 rounds"], "Buy in once at start. Cash out once at end. Sled push broken up any way across rounds."],
   },
@@ -549,28 +548,28 @@ const HYROX_PROGRAM = {
     "Mon": ["HYROX Foundation", "rft", 3, ["200m Farmer Carry (53/35 lbs x2)", "15 KB Swing (53/35 lbs)", "30 Goblet Squat (53/35 lbs)", "400m Ski or Row"], "Same KB weight throughout. Farmer carry should require 1-2 breaks."],
     "Tue": ["HYROX Engine", "emom", 20, ["20 Min Alt EMOM (50 sec on / 10 sec off)", "Min 1: Goblet Lunge (53/35 lbs)", "Min 2: Strict Pull Ups / Push Ups", "Min 3: 200m Run", "Min 4: Rest"], "Work 50 sec, 10 sec to transition. Max set of push ups then ring rows in remaining time."],
     "Wed": ["HYROX Aerobic", "fortime", 0, ["60 Min Run", "Include 2 x 15 Min Pickups at any point"], "Pickups at lactate threshold \u2014 pace just below discomfort."],
-    "Thu": ["HYROX Engine", "emom", 0, ["3 Rounds \u2014 1:00 on / 1:00 off per station", "Sled Push", "Sled Pull", "DB Box Over", "Headcutters (53/35 lbs)", "Push Ups"], "Work hard the full minute at each station. 1 min rest between stations."],
+    "Thu": ["HYROX Engine", "emom", 30, ["3 Rounds \u2014 1:00 on / 1:00 off per station", "Sled Push", "Sled Pull", "DB Box Over", "Headcutters (53/35 lbs)", "Push Ups"], "Work hard the full minute at each station. 1 min rest between stations."],
     "Fri": ["HYROX Complete", "fortime", 0, ["For Time", "100/75 Cal Bike or Ski", "100 Back Squats (105/75 lbs)", "1 Mile Run", "100 KB Swing (35/25 lbs)", "100/75 Cal Bike or Ski", "100 Headcutters (35/25 lbs)", "*Every break = 100m Farmer Carry (53/35 lbs x2)"], "Every break on back squats, KB swings, or headcutters = 100m farmer carry penalty."],
   },
   "P2W7": {
     "Mon": ["HYROX Foundation", "fortime", 0, ["For Time \u2014 4 Rounds", "30-25-20-15 KB Deadlift (53/35 lbs)", "30-25-20-15 DB/KB Lunges (35/25 lbs x2)", "30-25-20-15 Headcutters (53/35 lbs)", "100m Farmer Carry after each round (53/35 lbs x2)"], "Same weight for KB deadlift and farmer carry. Lunges front rack or to sides."],
     "Tue": ["HYROX Engine", "amrap", 3, ["5 x 3 Min AMRAP (3:00 on / 3:00 off)", "10 Devil Press (35/20 lbs x2)", "6 Burpee Box Jump Over", "Max Cal Bike"], "Devil press in 1:30 or less. Sprint effort each round. Score = cals, stay consistent."],
     "Wed": ["HYROX Engine", "fortime", 0, ["4 x 1000m Run at Race Pace", "2:00 Rest after each"], "Record each 1000m split. Note where pace changes."],
-    "Thu": ["HYROX Foundation", "amrap", 0, ["0:00-12:00 AMRAP:", "15 Wall Balls (20/14 lbs)", "12 DB Push Press (53/35 lbs x2)", "9 Cal Ski (gym day)", "---", "12:00-22:00 AMRAP:", "50ft Sled Push (AHAP)", "200m Run", "---", "22:00-30:00 AMRAP:", "8 Headcutters (70/35 lbs)", "10 Burpees"], "Each AMRAP flows immediately into next. Sled AHAP. Headcutters unbroken."],
+    "Thu": ["HYROX Foundation", "amrap", 30, ["0:00-12:00 AMRAP:", "15 Wall Balls (20/14 lbs)", "12 DB Push Press (53/35 lbs x2)", "9 Cal Ski (gym day)", "---", "12:00-22:00 AMRAP:", "50ft Sled Push (AHAP)", "200m Run", "---", "22:00-30:00 AMRAP:", "8 Headcutters (70/35 lbs)", "10 Burpees"], "Each AMRAP flows immediately into next. Sled AHAP. Headcutters unbroken."],
     "Fri": ["HYROX Complete", "fortime", 0, ["Part 1 \u2014 3 Rounds:", "30/20 Cal Bike", "100ft Sled Push (AHAP)", "50ft Burpee Broad Jump", "400m Run", "---", "Part 2 \u2014 3 Rounds:", "30/20 Cal Ski (gym day)", "20 KB Deadlift (53/35 lbs x2)", "100m Farmer Carry (53/35 lbs x2)", "25 Wall Balls (14/10 lbs)"], "Steady pace on BBJ. Recover on run. KB deadlift and farmer carry same weight. Wall balls unbroken."],
   },
   "P2W8": {
     "Mon": ["HYROX Foundation", "rft", 5, ["50ft Sled Pull", "12 Alt DB Snatch (35/20 lbs)", "25 Wall Balls (14/10 lbs)", "200m Ski (gym day)"], "Practice both walk-back and arms-only sled pull. Wall balls unbroken."],
-    "Tue": ["HYROX Engine", "emom", 2, ["E2MOM x 10 Rounds", "50ft Sled Push", "200m Sprint", "Rest in remaining time"], "Focus on running immediately after sled. Run feels like sprint."],
+    "Tue": ["HYROX Engine", "emom", 20, ["E2MOM x 10 Rounds", "50ft Sled Push", "200m Sprint", "Rest in remaining time"], "Focus on running immediately after sled. Run feels like sprint."],
     "Wed": ["HYROX Engine", "fortime", 0, ["8 x 400m Run", "2:00 Rest after each"], "Challenge yourself. Push the pace. Track splits. Find your breaking point."],
-    "Thu": ["HYROX Engine", "emom", 3, ["Every 3:30 x 5 Rounds", "30 Wall Balls", "200m Sprint", "Rest in remaining time"], "Speed focus. Wall balls unbroken. No rest between wall balls and sprint."],
+    "Thu": ["HYROX Engine", "emom", 18, ["Every 3:30 x 5 Rounds", "30 Wall Balls", "200m Sprint", "Rest in remaining time"], "Speed focus. Wall balls unbroken. No rest between wall balls and sprint."],
     "Fri": ["HYROX Complete", "rft", 3, ["500m Ski (gym day) or Row", "100ft KB Lunge (35/20 lbs x2)", "100m Farmer Carry (53/35 lbs x2)", "1000m Run", "*Accumulate 100m Sled Push or Pull throughout"], "Lunges can be front rack or to sides. Sled work broken up across rounds."],
   },
   "P2W9": {
     "Mon": ["HYROX Engine", "fortime", 0, ["5 Rounds \u2014 2:00 Rest between each", "Each round: 500m Run + Movement + 500m Run", "Round 1: + 500m Ski (gym day)", "Round 2: + 40 Burpee Broad Jumps", "Round 3: + 200m Farmer Carry (53/35 lbs x2)", "Round 4: + 80 Sandbag Lunge", "Round 5: + 100 Wall Balls (14/10 lbs)"], "Focus on run pace. Each run = race pace. Take splits on all runs."],
     "Tue": ["HYROX Complete", "fortime", 0, ["For Time \u2014 Descending", "50-40-30-20-10 Cal Ski (gym day)", "50-40-30-20-10 DB Push Press (53/35 lbs)", "50-40-30-20-10 Alt DB Snatch (35/20 lbs)", "50-40-30-20-10 DB Front Squat (35/20 lbs)"], "Steady pace. Break up DB movements as needed."],
     "Wed": ["HYROX Engine", "fortime", 0, ["8 x 200m Run Max Effort", "90 Sec Rest after each"], "Build to sprint. 80% for first 100m, sprint the second. Record splits."],
-    "Thu": ["HYROX Engine", "emom", 5, ["Every 5:00 x 6 Rounds", "10/8 Cal Bike", "50ft Sled Push", "200m Run", "Rest in remaining time"], "Focus on running immediately after sled. Legs compromised \u2014 push through."],
+    "Thu": ["HYROX Engine", "emom", 30, ["Every 5:00 x 6 Rounds", "10/8 Cal Bike", "50ft Sled Push", "200m Run", "Rest in remaining time"], "Focus on running immediately after sled. Legs compromised \u2014 push through."],
     "Fri": ["HYROX Complete", "fortime", 0, ["For Time \u2014 3 Rounds", "40-25-15 Cal Bike", "40-25-15 Wall Balls (14/10 lbs)", "40-25-15 Goblet Lunge", "40-25-15 DB Push Press (53/35 lbs x2)", "*800m Run after each round"], "Steady pace. Record 800m splits each round."],
   },
   "P2W10": {
@@ -674,14 +673,18 @@ const QUOTES = [
   "If you fail to prepare, you're prepared to fail. — Mark Spitz",
 ];
 
-var state = {week:1, day:null, done:{}, skipped:{}, programStart:null, notesOpen:{}};
+var state = {week:1, day:null, done:{}, skipped:{}, programStart:null, notesOpen:{}, weekOverride:false};
 
-function saveState(){try{localStorage.setItem('lehocky_hyrox',JSON.stringify({week:state.week,done:state.done,skipped:state.skipped,programStart:state.programStart}));}catch(e){}}
+function saveState(){try{localStorage.setItem('lehocky_hyrox',JSON.stringify({week:state.week,weekOverride:state.weekOverride,done:state.done,skipped:state.skipped,programStart:state.programStart}));}catch(e){}}
 function loadState(){try{var s=localStorage.getItem('lehocky_hyrox');return s?JSON.parse(s):null;}catch(e){return null;}}
 
 function getToday(){return JS_TO_KEY[new Date().getDay()];}
+function parseLocalDate(str){
+  var p=str.split('-');
+  return new Date(parseInt(p[0],10),parseInt(p[1],10)-1,parseInt(p[2],10));
+}
 function getWeekFromStart(startStr){
-  var start=new Date(startStr),now=new Date();
+  var start=parseLocalDate(startStr),now=new Date();
   var diff=Math.floor((now-start)/(7*24*3600*1000));
   return Math.min(Math.max(1,diff+1),24);
 }
@@ -753,7 +756,7 @@ buildMarquee();
 // PHASE DROPDOWN
 function togglePhaseDD(){document.getElementById('phaseDropdown').classList.toggle('open');}
 function jumpToPhase(ph){
-  state.week=ph===1?1:13;
+  state.week=ph===1?1:13;state.weekOverride=true;
   document.getElementById('phaseDropdown').classList.remove('open');
   saveState();renderAll();
 }
@@ -777,8 +780,13 @@ function closeSettings(){document.getElementById('settingsDrawer').classList.rem
 function saveStartDate(){
   var m=document.getElementById('startMonth').value,d=document.getElementById('startDay').value,y=document.getElementById('startYear').value;
   if(!m||!d||!y){alert('Please select Month, Day, and Year.');return;}
+  var check=new Date(parseInt(y,10),parseInt(m,10)-1,parseInt(d,10));
+  if(check.getMonth()!==parseInt(m,10)-1||check.getDate()!==parseInt(d,10)){
+    alert('That date is not valid — please check the day and month.');
+    return;
+  }
   var val=y+'-'+m+'-'+d;
-  state.programStart=val;state.week=getWeekFromStart(val);
+  state.programStart=val;state.weekOverride=false;state.week=getWeekFromStart(val);
   saveState();renderAll();
   var disp=document.getElementById('currentStartDisplay');
   if(disp)disp.textContent='Saved. You are on Week '+state.week+' of 24.';
@@ -790,13 +798,13 @@ function startProgramToday(){
   var dateStr=yyyy+'-'+mm+'-'+dd;
   var sm=document.getElementById('startMonth'),sd=document.getElementById('startDay'),sy=document.getElementById('startYear');
   if(sm)sm.value=mm;if(sd)sd.value=dd;if(sy)sy.value=yyyy;
-  state.programStart=dateStr;state.week=1;state.done={};state.skipped={};
+  state.programStart=dateStr;state.weekOverride=false;state.week=1;state.done={};state.skipped={};
   saveState();renderAll();
   alert('Program started today! You are on Week 1.');
 }
 
 function resetProgram(){
-  state.programStart=null;state.week=1;state.done={};state.skipped={};
+  state.programStart=null;state.weekOverride=false;state.week=1;state.done={};state.skipped={};
   try{localStorage.removeItem('lehocky_hyrox');}catch(e){}
   var sm=document.getElementById('startMonth'),sd=document.getElementById('startDay'),sy=document.getElementById('startYear');
   if(sm)sm.value='';if(sd)sd.value='';if(sy)sy.value='';
@@ -826,7 +834,7 @@ function renderWeekStrip(){
     el.textContent='W'+w;
     if(isAct)el.style.borderColor=col,el.style.color=col;
     el.dataset.w=w;
-    el.addEventListener('click',function(){state.week=parseInt(this.dataset.w);saveState();renderAll();closeSettings();});
+    el.addEventListener('click',function(){state.week=parseInt(this.dataset.w);state.weekOverride=true;saveState();renderAll();closeSettings();});
     strip.appendChild(el);
   }
 }
@@ -839,7 +847,7 @@ function renderDayNav(){
   // Calculate the Monday of the selected week based on program start
   var weekMonday;
   if(state.programStart){
-    var start=new Date(state.programStart);
+    var start=parseLocalDate(state.programStart);
     // Find Monday of start week
     var startDay=start.getDay();
     var daysToMon=startDay===0?1:(startDay===1?0:-(startDay-1));
@@ -892,8 +900,9 @@ function renderPhase(){
 // GET ROUTE FOR DISTANCE
 function getRouteForText(text){
   var routes=[];
-  var dists=['1 mile','1600m','1000m','800m','500m','400m','200m','100m'];
   var lower=text.toLowerCase();
+  if(lower.indexOf('run')<0&&lower.indexOf('jog')<0)return routes;
+  var dists=['1 mile','1600m','1000m','800m','500m','400m','200m','100m'];
   for(var i=0;i<dists.length;i++){
     if(lower.indexOf(dists[i].toLowerCase())>=0&&RUNNING_ROUTES[dists[i]]){
       routes.push(RUNNING_ROUTES[dists[i]]);
@@ -911,7 +920,7 @@ function renderWorkout(){
 
   // Race day check
   var now=new Date();
-  if(RACE_DATE-now<=0){
+  if(now.toDateString()===RACE_DATE.toDateString()){
     area.innerHTML='<div class="race-day-screen"><div class="race-big">RACE DAY!</div><div style="font-family:Barlow Condensed,sans-serif;font-size:1.5rem;letter-spacing:3px;color:#fff">Today is the day. Go get it.</div></div>';
     return;
   }
@@ -920,6 +929,12 @@ function renderWorkout(){
   if(!dayData||REST_DAYS.includes(day)){
     var nextTraining=day==='Sat'?'Monday':day==='Sun'?'Monday':'Monday';
     area.innerHTML='<div class="rest-screen"><div class="rest-big">REST DAY</div><div class="rest-msg">Recovery is part of the program. Let your body adapt and come back stronger.</div><div class="rest-next">Next training: '+nextTraining+'</div></div>';
+    autoConfigTimer('fortime',0,0);
+    return;
+  }
+
+  if(state.skipped[week+'-'+day]){
+    area.innerHTML='<div class="rest-screen"><div class="rest-big">SKIPPED</div><div class="rest-msg">Today is marked as skipped. Open Settings and tap "Undo Skip Today" to bring the workout back.</div></div>';
     autoConfigTimer('fortime',0,0);
     return;
   }
@@ -957,7 +972,7 @@ function renderWorkout(){
       '<div class="wmeta">'+
         '<span class="chip '+phChip+'">Phase '+ph+'</span>'+
         '<span class="chip">Wk '+week+'/24</span>'+
-        '<span class="chip ac">'+fmt.toUpperCase()+(fmtVal>0?' '+fmtVal+' MIN':'')+'</span>'+
+        '<span class="chip ac">'+fmt.toUpperCase()+(fmtVal>0?(fmt==='rft'?' \u2014 '+fmtVal+' ROUNDS':' '+fmtVal+' MIN'):'')+'</span>'+
       '</div>'+
     '</div>'+
     '<div class="ex-list">'+rows+'</div>'+
@@ -974,7 +989,7 @@ function renderWorkout(){
       (isDone?'✓ WORKOUT COMPLETE — TAP TO UNDO':'MARK WORKOUT DONE')+
     '</button>';
 
-  autoConfigTimer(fmt,fmtVal,dayData[2]);
+  autoConfigTimer(fmt,fmt==='rft'?0:fmtVal,fmt==='rft'?fmtVal:0);
 }
 
 function toggleNotes(btn){
@@ -991,6 +1006,7 @@ function toggleWorkoutDone(){
 
 // TIMER ENGINE
 var timerInterval=null,timerRunning=false,timerSecs=0,timerTotalSecs=0,timerDir='down';
+var timerGen=0;
 var timerFormat='amrap',timerRounds=0,timerTabataSet=0,timerTabataWork=true;
 var timerTabataWorkSecs=20,timerTabataRestSecs=10,timerTabataTotalSets=8;
 var timerRftRounds=0,timerRftTarget=4;
@@ -1024,7 +1040,7 @@ function updateTimerConfig(){
 function fmtTime(s){return Math.floor(s/60).toString().padStart(2,'0')+':'+(s%60).toString().padStart(2,'0');}
 
 function timerReset(){
-  clearInterval(timerInterval);timerRunning=false;timerRounds=0;timerTabataSet=0;
+  timerGen++;clearInterval(timerInterval);timerRunning=false;timerRounds=0;timerTabataSet=0;
   timerTabataWork=true;timerRftRounds=0;
   document.getElementById('roundsCount').textContent='0';
   document.getElementById('btnStart').style.display='flex';
@@ -1057,16 +1073,18 @@ function timerReset(){
 
 function timerStart(){
   if(timerRunning)return;
+  if(timerDir==='down'&&timerSecs<=0)timerReset();
   timerRunning=true;
   document.getElementById('btnStart').style.display='none';
   document.getElementById('btnPause').style.display=timerFormat==='fortime'?'none':'flex';
   document.getElementById('btnStop').style.display=timerFormat==='fortime'?'flex':'none';
   document.getElementById('timerBig').classList.add('running');
-  countdown321(function(){timerInterval=setInterval(timerTick,1000);});
+  var gen=timerGen;
+  countdown321(gen,function(){timerInterval=setInterval(timerTick,1000);});
 }
 
 function timerPause(){
-  timerRunning=false;clearInterval(timerInterval);
+  timerRunning=false;timerGen++;clearInterval(timerInterval);
   document.getElementById('btnStart').style.display='flex';
   document.getElementById('btnPause').style.display='none';
   document.getElementById('btnStop').style.display='none';
@@ -1074,7 +1092,7 @@ function timerPause(){
 }
 
 function timerStop(){
-  clearInterval(timerInterval);timerRunning=false;
+  timerGen++;clearInterval(timerInterval);timerRunning=false;
   var ft=fmtTime(timerSecs);
   document.getElementById('btnStart').style.display='flex';
   document.getElementById('btnStop').style.display='none';
@@ -1090,15 +1108,17 @@ function timerTick(){
     timerSecs--;
     if(timerSecs<=0){
       if(timerFormat==='tabata'){
-        timerTabataWork=!timerTabataWork;
-        if(timerTabataWork)timerTabataSet++;
-        if(timerTabataSet>=timerTabataTotalSets){
+        if(timerTabataWork&&timerTabataSet+1>=timerTabataTotalSets){
           big.textContent='DONE';sub.textContent='Tabata complete!';
+          big.classList.remove('rest-phase');
           clearInterval(timerInterval);timerRunning=false;beep(880,600);
           document.getElementById('btnStart').style.display='flex';
           document.getElementById('btnPause').style.display='none';return;
         }
+        timerTabataWork=!timerTabataWork;
+        if(timerTabataWork)timerTabataSet++;
         timerSecs=timerTabataWork?timerTabataWorkSecs:timerTabataRestSecs;
+        big.textContent=fmtTime(timerSecs);
         big.classList.toggle('running',timerTabataWork);big.classList.toggle('rest-phase',!timerTabataWork);
         sub.textContent=timerTabataWork?'WORK — Set '+(timerTabataSet+1)+' of '+timerTabataTotalSets:'REST — next set '+(timerTabataSet+2);
         beep(timerTabataWork?880:440,200);
@@ -1140,14 +1160,15 @@ function addRound(){
   beep(660,100);
 }
 
-function countdown321(cb){
+function countdown321(gen,cb){
   var overlay=document.getElementById('goOverlay'),txt=document.getElementById('goText');
   var steps=['3','2','1','GO!'],i=0;
   function step(){
+    if(gen!==timerGen){overlay.classList.remove('show');return;}
     txt.textContent=steps[i];overlay.classList.add('show');
     beep(i<3?440:880,i<3?150:500);i++;
     if(i<steps.length)setTimeout(function(){overlay.classList.remove('show');setTimeout(step,200);},700);
-    else setTimeout(function(){overlay.classList.remove('show');cb();},700);
+    else setTimeout(function(){overlay.classList.remove('show');if(gen===timerGen)cb();},700);
   }
   step();
 }
@@ -1336,7 +1357,8 @@ function init(){
     state.done=saved.done||{};
     state.skipped=saved.skipped||{};
     state.programStart=saved.programStart||null;
-    if(state.programStart)state.week=getWeekFromStart(state.programStart);
+    state.weekOverride=saved.weekOverride||false;
+    if(state.programStart&&!state.weekOverride)state.week=getWeekFromStart(state.programStart);
   }
   var today=getToday();
   state.day=REST_DAYS.includes(today)?'Mon':today;
