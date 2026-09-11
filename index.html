@@ -130,7 +130,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .mc-fmt{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;color:var(--hot);margin-bottom:.15rem}
 .mc-desc{font-size:.7rem;color:#bbb;line-height:1.3;margin-bottom:.3rem;font-style:italic}
 .mc-item{display:flex;justify-content:space-between;font-size:.9rem;padding:4px 0;border-bottom:1px solid var(--border);transition:opacity .12s}
-.mc-item.done{opacity:.3;text-decoration:line-through}
 .mc-done-btn{width:100%;padding:.5rem;border-radius:6px;border:1px solid var(--hot);background:transparent;color:var(--hot);font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;cursor:pointer;transition:all .15s;margin-top:.5rem}
 .mc-done-btn:hover{background:rgba(255,77,28,.12)}
 .mc-done-btn.mc-done-active{background:rgba(255,77,28,.15);border-color:var(--hot);color:#fff}
@@ -157,8 +156,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .timer-big.rest-phase{color:var(--cool)}
 .timer-sub{font-size:1rem;color:#ccc;margin-top:.4rem;font-family:'Barlow Condensed',sans-serif;font-weight:500;letter-spacing:1px;min-height:1.1rem}
 .timer-controls{display:flex;gap:.4rem;flex-shrink:0}
-.btn-timer{flex:1;padding:.65rem .3rem;border-radius:7px;border:none;font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:3px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;text-align:center}
-.btn-timer{flex:1;padding:.6rem .3rem;border-radius:7px;border:none;font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:3px;cursor:pointer;transition:all .15s}
+.btn-timer{flex:1;padding:.6rem .3rem;border-radius:7px;border:none;font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:3px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;text-align:center}
 .btn-start{background:var(--accent);color:#000}
 .btn-start:hover{background:#d4e800}
 .btn-pause{background:var(--border);color:#fff}
@@ -407,19 +405,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
         </div>
         <div class="cfg-row" id="cfgRoundsRow" style="display:none">
           <label>Rounds</label>
-          <input class="cfg-input" type="number" id="cfgRounds" value="5" min="1" max="30">
+          <input class="cfg-input" type="number" id="cfgRounds" value="5" min="1" max="30" onchange="updateTimerConfig()">
         </div>
         <div class="cfg-row" id="cfgWorkRow" style="display:none">
           <label>Work (sec)</label>
-          <input class="cfg-input" type="number" id="cfgWork" value="20" min="5" max="60">
+          <input class="cfg-input" type="number" id="cfgWork" value="20" min="5" max="60" onchange="updateTimerConfig()">
         </div>
         <div class="cfg-row" id="cfgRestRow" style="display:none">
           <label>Rest (sec)</label>
-          <input class="cfg-input" type="number" id="cfgRest" value="10" min="5" max="60">
+          <input class="cfg-input" type="number" id="cfgRest" value="10" min="5" max="60" onchange="updateTimerConfig()">
         </div>
         <div class="cfg-row" id="cfgSetsRow" style="display:none">
           <label>Sets</label>
-          <input class="cfg-input" type="number" id="cfgSets" value="8" min="1" max="20">
+          <input class="cfg-input" type="number" id="cfgSets" value="8" min="1" max="20" onchange="updateTimerConfig()">
         </div>
       </div>
       <button class="end-workout-btn" onclick="triggerEndWorkout()">🏆 END WORKOUT</button>
@@ -455,13 +453,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 
   </div>
 </div>
-    </div>
-  </div>
-</div>
 
 <script>
 // ── PROGRAM DATA ──────────────────────────────────────────────────────────────
-const PROGRAM_START = new Date('2025-05-19');
 const DAYS_ORDER = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 const REST_DAYS = ['Wed','Sat','Sun'];
 const JS_TO_KEY = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -484,23 +478,6 @@ const PHASE_DESCS = [
   "Establishing movement patterns, moderate loads, building consistency.",
   "New variations, heavier compound work, longer MetCons.",
   "Max intensity, heaviest loads, brutal conditioning finishers."
-];
-const QUOTES = [
-  "The iron never lies to you. — Henry Rollins",
-  "Strong people are harder to kill and more useful in general. — Mark Rippetoe",
-  "Pain is temporary. Quitting lasts forever. — Lance Armstrong",
-  "The only bad workout is the one that didn't happen.",
-  "Be stronger than your excuses.",
-  "Your body can stand almost anything. It's your mind you have to convince.",
-  "Sweat is just fat crying.",
-  "The gym is my therapy. The weights are my medicine.",
-  "Train insane or remain the same.",
-  "Success starts with self-discipline.",
-  "Every rep brings you closer. Every missed rep takes you further away.",
-  "You don't get what you wish for. You get what you work for.",
-  "Discipline is the bridge between goals and accomplishment.",
-  "The only way to define your limits is by going beyond them.",
-  "Champions aren't made in gyms. Champions are made from something deep inside.",
 ];
 const STRENGTH = {
   Mon:{
@@ -699,6 +676,7 @@ function saveState() {
   try {
     localStorage.setItem('lehocky_state', JSON.stringify({
       week: state.week,
+      weekOverride: state.weekOverride,
       deload: state.deload,
       skipped: state.skipped,
       done: state.done,
@@ -707,9 +685,14 @@ function saveState() {
   } catch(e) {}
 }
 
+function parseLocalDate(str) {
+  var p = str.split('-');
+  return new Date(parseInt(p[0],10), parseInt(p[1],10)-1, parseInt(p[2],10));
+}
+
 function getWeekFromStart(startDateStr) {
   if(!startDateStr) return 1;
-  var start = new Date(startDateStr);
+  var start = parseLocalDate(startDateStr);
   var now = new Date();
   var diff = Math.floor((now - start) / (7*24*3600*1000));
   return Math.min(Math.max(1, diff+1), 12);
@@ -720,35 +703,20 @@ function saveStartDate() {
   var d = document.getElementById('startDay').value;
   var y = document.getElementById('startYear').value;
   if(!m || !d || !y) { alert('Please select Month, Day, and Year.'); return; }
+  var check = new Date(parseInt(y,10), parseInt(m,10)-1, parseInt(d,10));
+  if(check.getMonth() !== parseInt(m,10)-1 || check.getDate() !== parseInt(d,10)) {
+    alert('That date is not valid — please check the day and month.');
+    return;
+  }
   var val = y + '-' + m + '-' + d;
   state.programStart = val;
+  state.weekOverride = false;
   state.week = getWeekFromStart(val);
   saveState();
   renderAll();
   var disp = document.getElementById('currentStartDisplay');
   if(disp) disp.textContent = 'Saved. You are on Week ' + state.week + ' of 12.';
   alert('Start date saved! You are on Week ' + state.week + '.');
-}
-
-function resetProgram() {
-  state.programStart = null;
-  state.week = 1;
-  state.done = {};
-  state.skipped = {};
-  state.deload = false;
-  try { localStorage.removeItem('lehocky_state'); } catch(e) {}
-  saveState();
-  // Reset dropdowns
-  var sm = document.getElementById('startMonth');
-  var sd = document.getElementById('startDay');
-  var sy = document.getElementById('startYear');
-  if(sm) sm.value = '';
-  if(sd) sd.value = '';
-  if(sy) sy.value = '';
-  var disp = document.getElementById('currentStartDisplay');
-  if(disp) disp.textContent = 'Program reset to Week 1.';
-  renderAll();
-  alert('Program reset to Week 1. All progress cleared.');
 }
 
 function startProgramToday() {
@@ -765,6 +733,7 @@ function startProgramToday() {
   if(sd) sd.value = dd;
   if(sy) sy.value = yyyy;
   state.programStart = dateStr;
+  state.weekOverride = false;
   state.week = 1;
   state.done = {};
   state.skipped = {};
@@ -782,16 +751,23 @@ function resetProgram() {
   state.done = {};
   state.skipped = {};
   state.deload = false;
-  saveState();
+  state.weekOverride = false;
   try { localStorage.removeItem('lehocky_state'); } catch(e) {}
+  var sm = document.getElementById('startMonth');
+  var sd = document.getElementById('startDay');
+  var sy = document.getElementById('startYear');
+  if(sm) sm.value = '';
+  if(sd) sd.value = '';
+  if(sy) sy.value = '';
+  var disp = document.getElementById('currentStartDisplay');
+  if(disp) disp.textContent = 'Program reset to Week 1.';
   renderAll();
   closeSettings();
 }
 
-var state = {week:1, day:null, deload:false, skipped:{}, done:{}, programStart:null};
+var state = {week:1, day:null, deload:false, skipped:{}, done:{}, programStart:null, weekOverride:false};
 
 function getToday(){return JS_TO_KEY[new Date().getDay()];}
-function getAutoWeek(){return Math.min(Math.max(1,Math.floor((new Date()-PROGRAM_START)/(7*24*3600*1000))+1),12);}
 function getPhase(w){return w<=4?0:w<=8?1:2;}
 function getPhSub(w){return w<=4?w-1:w<=8?w-5:w-9;}
 function phKey(w){return['foundation','build','peak'][getPhase(w)];}
@@ -806,8 +782,6 @@ function updateClock(){
 setInterval(updateClock,1000);updateClock();
 
 async function fetchWeather(){
-  document.getElementById('tempVal').textContent='--°F';
-  document.getElementById('humVal').textContent='Wylie, TX';
   try{
     const r=await fetch('https://wttr.in/Wylie+TX?format=j1');
     const d=await r.json();
@@ -913,7 +887,7 @@ function openSettings(){document.getElementById('settingsDrawer').classList.add(
 function closeSettings(){document.getElementById('settingsDrawer').classList.remove('open');document.getElementById('overlay').classList.remove('show');}
 
 function togglePhaseDD(){document.getElementById('phaseDropdown').classList.toggle('open');}
-function jumpToPhase(ph){state.week=[1,5,9][ph];document.getElementById('phaseDropdown').classList.remove('open');renderAll();}
+function jumpToPhase(ph){state.week=[1,5,9][ph];state.weekOverride=true;document.getElementById('phaseDropdown').classList.remove('open');saveState();renderAll();}
 document.addEventListener('click',function(e){if(!e.target.closest('.phase-dropdown-wrap'))document.getElementById('phaseDropdown').classList.remove('open');});
 
 function renderWeekStrip(){
@@ -926,17 +900,20 @@ function renderWeekStrip(){
       '<span class="wp" style="color:'+(isAct?phColors[ph]:'var(--muted)')+'">'+['F','B','P'][ph]+'</span>'+
       '<div class="wi"><div class="wf" style="width:'+pct+'%;background:'+phColors[ph]+'"></div></div></div>';
   }).join('');
-  strip.querySelectorAll('.wk').forEach(function(el){el.addEventListener('click',function(){state.week=parseInt(el.dataset.w);saveState();renderAll();});});
+  strip.querySelectorAll('.wk').forEach(function(el){el.addEventListener('click',function(){state.week=parseInt(el.dataset.w);state.weekOverride=true;saveState();renderAll();});});
 }
 
 function renderDayNav(){
-  var today=getToday(),nav=document.getElementById('dayNav'),now=new Date(),todayIdx=now.getDay();
+  var today=getToday(),nav=document.getElementById('dayNav'),now=new Date();
+  var monday=new Date(now);
+  monday.setDate(now.getDate()+(now.getDay()===0?-6:1-now.getDay()));
+  var dayOffsets={Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6};
   var typeMap={Mon:'Upper Str',Tue:'Lower Str',Thu:'Upper Cond',Fri:'Lower MetCon'};
   nav.innerHTML=DAYS_ORDER.map(function(key){
     var isRest=REST_DAYS.includes(key),isAct=key===state.day;
     var isSkip=state.skipped[state.week+'-'+key],isTodayKey=key===today;
-    var dayIdx=JS_TO_KEY.indexOf(key),d=new Date(now);
-    d.setDate(now.getDate()+(dayIdx-todayIdx));
+    var d=new Date(monday);
+    d.setDate(monday.getDate()+dayOffsets[key]);
     var todayDot=isTodayKey?'<span style="display:block;width:5px;height:5px;border-radius:50%;background:var(--accent);margin:.5px auto 0"></span>':'';
     var typeLabel=isRest?'Rest Day':(isSkip?'Skipped':(typeMap[key]||'Off'));
     return '<div class="day-btn'+(isAct?' active-d':'')+(isRest?' rest-d':'')+(isSkip?' skip-d':'')+(isTodayKey?' today-d':'')+'" data-day="'+key+'">'+
@@ -984,6 +961,13 @@ function renderWorkout(){
       '<div class="rest-big">REST DAY</div>'+
       '<div class="rest-msg">Recovery is part of the program. Sleep well, eat well, and come back strong.</div>'+
       '<div style="margin-top:1rem;font-family:Barlow Condensed,sans-serif;font-size:.9rem;letter-spacing:2px;color:var(--accent);text-transform:uppercase">Next training day: '+nextDay+'</div>'+
+    '</div>';
+    return;
+  }
+  if(state.skipped[week+'-'+day]){
+    area.innerHTML='<div class="rest-screen">'+
+      '<div class="rest-big">SKIPPED</div>'+
+      '<div class="rest-msg">Today is marked as skipped. Open Settings and tap "Undo Skip Today" to bring the workout back.</div>'+
     '</div>';
     return;
   }
@@ -1049,6 +1033,7 @@ function renderWorkout(){
 
 // TIMER
 var timerInterval=null,timerRunning=false,timerSecs=0,timerTotalSecs=0,timerDir='down';
+var timerGen=0;
 var timerFormat='amrap',timerRounds=0,timerTabataSet=0,timerTabataWork=true;
 var timerTabataWorkSecs=20,timerTabataRestSecs=10,timerTabataTotalSets=8;
 var timerRftRounds=0,timerRftTarget=5;
@@ -1078,7 +1063,7 @@ function updateTimerConfig(){
 function fmtTime(s){return Math.floor(s/60).toString().padStart(2,'0')+':'+(s%60).toString().padStart(2,'0');}
 
 function timerReset(){
-  clearInterval(timerInterval);timerRunning=false;timerRounds=0;timerTabataSet=0;
+  timerGen++;clearInterval(timerInterval);timerRunning=false;timerRounds=0;timerTabataSet=0;
   timerTabataWork=true;timerRftRounds=0;
   document.getElementById('roundsCount').textContent='0';
   document.getElementById('btnStart').style.display='flex';
@@ -1111,16 +1096,18 @@ function timerReset(){
 
 function timerStart(){
   if(timerRunning)return;
+  if(timerDir==='down'&&timerSecs<=0)timerReset();
   timerRunning=true;
   document.getElementById('btnStart').style.display='none';
   document.getElementById('btnPause').style.display=(timerFormat==='fortime'?'none':'flex');
   document.getElementById('btnStop').style.display=(timerFormat==='fortime'?'flex':'none');
   document.getElementById('timerBig').classList.add('running');
-  countdown321(function(){timerInterval=setInterval(timerTick,1000);});
+  var gen=timerGen;
+  countdown321(gen,function(){timerInterval=setInterval(timerTick,1000);});
 }
 
 function timerPause(){
-  timerRunning=false;clearInterval(timerInterval);
+  timerRunning=false;timerGen++;clearInterval(timerInterval);
   document.getElementById('btnStart').style.display='flex';
   document.getElementById('btnPause').style.display='none';
   document.getElementById('btnStop').style.display='none';
@@ -1128,7 +1115,7 @@ function timerPause(){
 }
 
 function timerStop(){
-  clearInterval(timerInterval);timerRunning=false;
+  timerGen++;clearInterval(timerInterval);timerRunning=false;
   var ft=fmtTime(timerSecs);
   document.getElementById('btnStart').style.display='flex';
   document.getElementById('btnStop').style.display='none';
@@ -1144,16 +1131,18 @@ function timerTick(){
     timerSecs--;
     if(timerSecs<=0){
       if(timerFormat==='tabata'){
-        timerTabataWork=!timerTabataWork;
-        if(timerTabataWork)timerTabataSet++;
-        if(timerTabataSet>=timerTabataTotalSets){
+        if(timerTabataWork&&timerTabataSet+1>=timerTabataTotalSets){
           big.textContent='DONE';sub.textContent='Tabata complete!';
+          big.classList.remove('rest-phase');
           clearInterval(timerInterval);timerRunning=false;beep(880,600);
           document.getElementById('btnStart').style.display='flex';
           document.getElementById('btnPause').style.display='none';
           return;
         }
+        timerTabataWork=!timerTabataWork;
+        if(timerTabataWork)timerTabataSet++;
         timerSecs=timerTabataWork?timerTabataWorkSecs:timerTabataRestSecs;
+        big.textContent=fmtTime(timerSecs);
         big.classList.toggle('running',timerTabataWork);
         big.classList.toggle('rest-phase',!timerTabataWork);
         sub.textContent=timerTabataWork?'WORK — Set '+(timerTabataSet+1)+' of '+timerTabataTotalSets:'REST — next set '+(timerTabataSet+2);
@@ -1197,14 +1186,15 @@ function addRound(){
   beep(660,100);
 }
 
-function countdown321(cb){
+function countdown321(gen,cb){
   var overlay=document.getElementById('goOverlay'),txt=document.getElementById('goText');
   var steps=['3','2','1','GO!'],i=0;
   function step(){
+    if(gen!==timerGen){overlay.classList.remove('show');return;}
     txt.textContent=steps[i];overlay.classList.add('show');
     beep(i<3?440:880,i<3?150:500);i++;
     if(i<steps.length)setTimeout(function(){overlay.classList.remove('show');setTimeout(step,200);},700);
-    else setTimeout(function(){overlay.classList.remove('show');cb();},700);
+    else setTimeout(function(){overlay.classList.remove('show');if(gen===timerGen)cb();},700);
   }
   step();
 }
@@ -1245,8 +1235,9 @@ function init(){
     state.skipped = saved.skipped || {};
     state.done = saved.done || {};
     state.programStart = saved.programStart || null;
-    // Recalculate week from start date if set
-    if(state.programStart) {
+    state.weekOverride = saved.weekOverride || false;
+    // Recalculate week from start date if set (unless the user manually picked a week)
+    if(state.programStart && !state.weekOverride) {
       state.week = getWeekFromStart(state.programStart);
     }
   }
