@@ -199,6 +199,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .go-overlay.show{opacity:1}
 .go-text{font-family:'Bebas Neue',sans-serif;font-size:10rem;letter-spacing:8px;color:var(--accent);text-shadow:0 0 80px rgba(232,255,0,.4)}
 
+.day-btn.done-d{border-color:rgba(232,255,0,.3)}
+.day-btn.done-d .dtype{color:var(--accent)}
+.hyrox-stations{display:flex;flex-direction:column;gap:4px}
+.station-run{font-size:.66rem;color:#888;text-align:center;letter-spacing:1.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;padding:2px 0}
+.station-row{display:flex;align-items:center;gap:.5rem;background:var(--card);border:1px solid var(--border);border-radius:5px;padding:.32rem .55rem;font-family:'Barlow Condensed',sans-serif;font-size:.82rem}
+.station-num{font-family:'Bebas Neue',sans-serif;font-size:.95rem;color:var(--hyrox);width:16px;text-align:center;flex-shrink:0}
+.station-name{font-weight:700;color:#fff;flex:1;letter-spacing:.3px}
+.station-std{color:#aaa;font-size:.72rem;text-align:right;white-space:nowrap}
+
 /* COIN */
 .coin-scene{perspective:900px;width:280px;height:280px;flex-shrink:0}
 .coin{width:280px;height:280px;position:relative;transform-style:preserve-3d;animation:coinSpin 2.2s linear infinite;border-radius:50%}
@@ -242,6 +251,41 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   <div class="drawer-section">
     <div class="drawer-section-title">Select Week</div>
     <div class="week-strip" id="weekStrip"></div>
+  </div>
+  <div class="drawer-section">
+    <div class="drawer-section-title">Race Day</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.75rem .85rem;display:flex;flex-direction:column;gap:.6rem">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;color:#fff">Race Date</div>
+      <div style="display:flex;gap:.4rem">
+        <select id="raceMonth" style="flex:1;background:var(--surface);border:1px solid var(--border);color:#fff;padding:8px 6px;border-radius:5px;font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:600">
+          <option value="">Month</option>
+          <option value="01">January</option><option value="02">February</option><option value="03">March</option><option value="04">April</option><option value="05">May</option><option value="06">June</option><option value="07">July</option><option value="08">August</option><option value="09">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option>
+        </select>
+        <select id="raceDay" style="flex:1;background:var(--surface);border:1px solid var(--border);color:#fff;padding:8px 6px;border-radius:5px;font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:600">
+          <option value="">Day</option><option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
+        </select>
+        <select id="raceYear" style="flex:1;background:var(--surface);border:1px solid var(--border);color:#fff;padding:8px 6px;border-radius:5px;font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:600">
+          <option value="">Year</option>
+          <option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option>
+        </select>
+      </div>
+      <div id="raceDateDisplay" style="font-size:.72rem;color:#888;font-family:'Barlow Condensed',sans-serif"></div>
+    </div>
+    <button class="drawer-btn accent-btn" onclick="saveRaceDate()" style="font-size:.95rem;padding:.65rem">&#127937; SAVE RACE DAY</button>
+  </div>
+  <div class="drawer-section">
+    <div class="drawer-section-title">Race Format &#8212; Open Division</div>
+    <div class="hyrox-stations">
+      <div class="station-run">1 km run before every station &#8212; 8 runs, 8 stations</div>
+      <div class="station-row"><span class="station-num">1</span><span class="station-name">SkiErg</span><span class="station-std">1000m</span></div>
+      <div class="station-row"><span class="station-num">2</span><span class="station-name">Sled Push</span><span class="station-std">50m &#8212; 152/102 kg</span></div>
+      <div class="station-row"><span class="station-num">3</span><span class="station-name">Sled Pull</span><span class="station-std">50m &#8212; 103/78 kg</span></div>
+      <div class="station-row"><span class="station-num">4</span><span class="station-name">Burpee Broad Jumps</span><span class="station-std">80m</span></div>
+      <div class="station-row"><span class="station-num">5</span><span class="station-name">RowErg</span><span class="station-std">1000m</span></div>
+      <div class="station-row"><span class="station-num">6</span><span class="station-name">Farmers Carry</span><span class="station-std">200m &#8212; 2&#215;24/16 kg</span></div>
+      <div class="station-row"><span class="station-num">7</span><span class="station-name">Sandbag Lunges</span><span class="station-std">100m &#8212; 20/10 kg</span></div>
+      <div class="station-row"><span class="station-num">8</span><span class="station-name">Wall Balls</span><span class="station-std">100/75 reps &#8212; 6/4 kg</span></div>
+    </div>
   </div>
   <div class="drawer-section">
     <div class="drawer-section-title">Program Settings</div>
@@ -342,7 +386,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
           <div class="countdown-unit">Sec</div>
         </div>
       </div>
-      <div class="countdown-race-date">Nov 19, 2026 — Hyrox Race Day</div>
+      <div class="countdown-race-date" id="cdRaceDate">Nov 19, 2026 — Hyrox Race Day</div>
     </div>
 
     <div class="widget-divider"></div>
@@ -609,7 +653,12 @@ const RUNNING_ROUTES = {
 const DAYS_ORDER = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 const REST_DAYS = ['Sat','Sun'];
 const JS_TO_KEY = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-const RACE_DATE = new Date('2026-11-19T07:00:00');
+const DEFAULT_RACE_DATE = '2026-11-19';
+function getRaceDate(){
+  var d=parseLocalDate((state&&state.raceDate)||DEFAULT_RACE_DATE);
+  d.setHours(7,0,0,0);
+  return d;
+}
 
 const QUOTES = [
   "I hated every minute of training, but I said, don't quit. Suffer now and live the rest of your life as a champion. — Muhammad Ali",
@@ -673,9 +722,9 @@ const QUOTES = [
   "If you fail to prepare, you're prepared to fail. — Mark Spitz",
 ];
 
-var state = {week:1, day:null, done:{}, skipped:{}, programStart:null, notesOpen:{}, weekOverride:false};
+var state = {week:1, day:null, done:{}, skipped:{}, programStart:null, notesOpen:{}, weekOverride:false, raceDate:null};
 
-function saveState(){try{localStorage.setItem('lehocky_hyrox',JSON.stringify({week:state.week,weekOverride:state.weekOverride,done:state.done,skipped:state.skipped,programStart:state.programStart}));}catch(e){}}
+function saveState(){try{localStorage.setItem('lehocky_hyrox',JSON.stringify({week:state.week,weekOverride:state.weekOverride,done:state.done,skipped:state.skipped,programStart:state.programStart,raceDate:state.raceDate}));}catch(e){}}
 function loadState(){try{var s=localStorage.getItem('lehocky_hyrox');return s?JSON.parse(s):null;}catch(e){return null;}}
 
 function getToday(){return JS_TO_KEY[new Date().getDay()];}
@@ -708,7 +757,12 @@ setInterval(updateClock,1000);updateClock();
 
 // COUNTDOWN
 function updateCountdown(){
-  var now=new Date(),diff=RACE_DATE-now;
+  var now=new Date(),RACE=getRaceDate(),diff=RACE-now;
+  var lbl=document.getElementById('cdRaceDate');
+  if(lbl){
+    var wksOut=Math.ceil(diff/(7*24*3600*1000));
+    lbl.textContent=RACE.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' — Hyrox Race Day'+(diff>0&&wksOut>0?' ('+wksOut+' wk'+(wksOut===1?'':'s')+' out)':'');
+  }
   if(diff<=0){
     document.getElementById('cdDays').textContent='GO';
     document.getElementById('cdHrs').textContent='00';
@@ -772,6 +826,11 @@ function openSettings(){
     var disp=document.getElementById('currentStartDisplay');
     if(disp)disp.textContent='Currently on Week '+state.week+' of 24';
   }
+  var rd=(state.raceDate||DEFAULT_RACE_DATE).split('-');
+  var rm=document.getElementById('raceMonth'),rdd=document.getElementById('raceDay'),ry=document.getElementById('raceYear');
+  if(rm&&rd[1])rm.value=rd[1];if(rdd&&rd[2])rdd.value=rd[2];if(ry&&rd[0])ry.value=rd[0];
+  var rdisp=document.getElementById('raceDateDisplay');
+  if(rdisp)rdisp.textContent='Race day: '+getRaceDate().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
   document.getElementById('settingsDrawer').classList.add('open');
   document.getElementById('overlay').classList.add('show');
 }
@@ -791,6 +850,21 @@ function saveStartDate(){
   var disp=document.getElementById('currentStartDisplay');
   if(disp)disp.textContent='Saved. You are on Week '+state.week+' of 24.';
   alert('Start date saved! You are on Week '+state.week+' of 24.');
+}
+
+function saveRaceDate(){
+  var m=document.getElementById('raceMonth').value,d=document.getElementById('raceDay').value,y=document.getElementById('raceYear').value;
+  if(!m||!d||!y){alert('Please select Month, Day, and Year.');return;}
+  var check=new Date(parseInt(y,10),parseInt(m,10)-1,parseInt(d,10));
+  if(check.getMonth()!==parseInt(m,10)-1||check.getDate()!==parseInt(d,10)){
+    alert('That date is not valid — please check the day and month.');
+    return;
+  }
+  state.raceDate=y+'-'+m+'-'+d;
+  saveState();updateCountdown();renderWorkout();
+  var disp=document.getElementById('raceDateDisplay');
+  if(disp)disp.textContent='Race day saved: '+getRaceDate().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  alert('Race day saved! The countdown now targets '+getRaceDate().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+'.');
 }
 
 function startProgramToday(){
@@ -870,13 +944,14 @@ function renderDayNav(){
   nav.innerHTML=DAYS_ORDER.map(function(key){
     var isRest=REST_DAYS.includes(key),isAct=key===state.day;
     var isSkip=state.skipped[state.week+'-'+key];
+    var isDone=!isRest&&state.done[state.week+'-'+key];
     var d=new Date(weekMonday);
     d.setDate(weekMonday.getDate()+dayOffsets[key]);
     var isToday=d.toDateString()===now.toDateString();
     var dayData=wkData[key];
-    var dtype=isRest?'Rest':(isSkip?'Skipped':(dayData?dayData[0].replace('HYROX ',''):'Rest'));
+    var dtype=isRest?'Rest':(isSkip?'Skipped':(isDone?'\u2713 Done':(dayData?dayData[0].replace('HYROX ',''):'Rest')));
     var dateStr=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-    return '<div class="day-btn'+(isAct?' active-d':'')+(isRest?' rest-d':'')+(isToday?' today-d':'')+'" data-day="'+key+'">'+
+    return '<div class="day-btn'+(isAct?' active-d':'')+(isRest?' rest-d':'')+(isToday?' today-d':'')+(isDone?' done-d':'')+'" data-day="'+key+'">'+
       '<span class="dl">'+key.toUpperCase()+'</span>'+
       '<span class="dt">'+dateStr+'</span>'+
       '<span class="dtype">'+dtype+'</span></div>';
@@ -920,7 +995,7 @@ function renderWorkout(){
 
   // Race day check
   var now=new Date();
-  if(now.toDateString()===RACE_DATE.toDateString()){
+  if(now.toDateString()===getRaceDate().toDateString()){
     area.innerHTML='<div class="race-day-screen"><div class="race-big">RACE DAY!</div><div style="font-family:Barlow Condensed,sans-serif;font-size:1.5rem;letter-spacing:3px;color:#fff">Today is the day. Go get it.</div></div>';
     return;
   }
@@ -1001,7 +1076,7 @@ function toggleNotes(btn){
 function toggleWorkoutDone(){
   var dk=state.week+'-'+state.day;
   state.done[dk]=!state.done[dk];
-  saveState();renderWorkout();
+  saveState();renderDayNav();renderWorkout();
 }
 
 // TIMER ENGINE
@@ -1358,10 +1433,12 @@ function init(){
     state.skipped=saved.skipped||{};
     state.programStart=saved.programStart||null;
     state.weekOverride=saved.weekOverride||false;
+    state.raceDate=saved.raceDate||null;
     if(state.programStart&&!state.weekOverride)state.week=getWeekFromStart(state.programStart);
   }
   var today=getToday();
   state.day=REST_DAYS.includes(today)?'Mon':today;
+  updateCountdown();
   renderAll();
 }
 init();
