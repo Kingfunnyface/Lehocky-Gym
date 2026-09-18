@@ -117,6 +117,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .chip.phase1{border-color:var(--f-color);color:var(--f-color)}
 .chip.phase2{border-color:var(--b-color);color:var(--b-color)}
 .ex-list{display:flex;flex-direction:column;gap:5px;flex:1}
+.ex-group{display:flex;flex-direction:column;gap:4px;min-width:0}
+/* multi-column spill for long workouts (applied by fitWorkout) */
+.ex-list.two-col,.ex-list.three-col{display:block;column-gap:12px}
+.ex-list.two-col{column-count:2}
+.ex-list.three-col{column-count:3}
+.ex-list.two-col .ex-group,.ex-list.three-col .ex-group{
+  break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;margin-bottom:8px}
+.ex-list.two-col .ex-row,.ex-list.three-col .ex-row{flex:none}
 .ex-row{display:flex;align-items:center;padding:.75rem .85rem;border-radius:6px;background:var(--card);border:1px solid transparent}
 .ex-row.divider{background:transparent;border-color:transparent;padding:.1rem 0}
 .ex-row.divider span{display:block;height:1px;background:var(--border);width:100%}
@@ -266,7 +274,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 
   /* stretch rows to consume the panel — kills the empty black below */
   .ex-list{gap:8px}
-  .ex-row:not(.divider){flex:1 0 auto;padding:.9rem 1.2rem}
+  .ex-list:not(.two-col):not(.three-col) .ex-group{flex:1 0 auto}
+  .ex-list:not(.two-col):not(.three-col) .ex-group .ex-row:not(.divider){flex:1 0 auto}
+  .ex-row:not(.divider){padding:.9rem 1.2rem}
+  .ex-list.three-col .ex-text{font-size:1.5rem}
+  .ex-list.two-col .ex-text{font-size:1.75rem}
+  .ex-list.two-col .ex-row:not(.divider),.ex-list.three-col .ex-row:not(.divider){padding:.6rem .85rem}
   .ex-text{font-size:2.1rem}
   .route-note{font-size:1.05rem;padding:.5rem .9rem}
   .notes-btn{font-size:.95rem;padding:7px 16px}
@@ -286,7 +299,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   .timer-panel{padding:.7rem 1.1rem;gap:.45rem}
   .panel-title{font-size:.95rem}
   .timer-format-badge{font-size:1.6rem;margin-bottom:.3rem}
-  .timer-big{font-size:9.5rem}
+  .timer-panel{overflow-y:auto}
+  .timer-big{font-size:9.5rem;line-height:1.02}
   .timer-sub{font-size:1.25rem}
   .btn-timer{font-size:1.65rem;padding:.7rem .3rem}
   .btn-reset-t{font-size:1.35rem;padding:.7rem 1.1rem}
@@ -403,6 +417,65 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   .coin-scene,.coin{width:190px;height:190px}
   #celebComplete>div:first-child{font-size:2.4rem!important;letter-spacing:4px!important}
   #celebQuote{font-size:.95rem!important;letter-spacing:1px!important;max-width:88vw!important}
+}
+/* ── Short windows at TV width: shrink clock + chrome together so the timer
+      panel (worst case: Tabata's four config rows) is never cut off. ──── */
+@media (min-width:1600px) and (max-height:1000px){
+  .timer-big{font-size:7.2rem}
+  .timer-format-badge{font-size:1.35rem;margin-bottom:.2rem}
+  .timer-sub{font-size:1.1rem}
+  .btn-timer{font-size:1.45rem;padding:.55rem .3rem}
+  .btn-reset-t{font-size:1.2rem;padding:.55rem 1rem}
+  .rounds-display{padding:.45rem .9rem}
+  .rounds-count{font-size:2.2rem}
+  .rounds-label{font-size:1.05rem}
+  .cfg-row{padding:.35rem .9rem}
+  .cfg-row label{font-size:1rem}
+  .cfg-input{font-size:1.05rem;padding:5px 9px}
+  .cfg-select{font-size:.92rem;padding:5px 9px}
+  .end-workout-btn{font-size:1.25rem;padding:.5rem}
+  .panel-title{font-size:.85rem}
+}
+@media (min-width:1600px) and (max-height:860px){
+  .timer-big{font-size:5.4rem}
+  .timer-format-badge{font-size:1.1rem}
+  .timer-sub{font-size:.95rem}
+  .btn-timer{font-size:1.25rem;padding:.45rem .3rem}
+  .btn-reset-t{font-size:1.05rem;padding:.45rem .9rem}
+  .rounds-display{padding:.35rem .8rem}
+  .rounds-count{font-size:1.8rem}
+  .rounds-label{font-size:.92rem}
+  .cfg-row{padding:.26rem .8rem}
+  .cfg-row label{font-size:.9rem}
+  .cfg-input{font-size:.95rem;padding:4px 8px;width:80px}
+  .cfg-select{font-size:.85rem;padding:4px 8px;width:190px}
+  .end-workout-btn{font-size:1.1rem;padding:.42rem}
+  /* reclaim vertical room in the header too */
+  .gym-logo{width:170px;height:170px}
+  .day-btn{padding:.3rem .3rem}
+  .dl{font-size:1.4rem}
+}
+@media (min-width:1600px) and (max-height:740px){
+  .timer-panel{padding:.45rem .9rem;gap:.28rem}
+  .timer-display{padding:.3rem .4rem}
+  .timer-big{font-size:3.6rem}
+  .timer-format-badge{font-size:.9rem;margin-bottom:.08rem}
+  .timer-sub{font-size:.8rem;min-height:.9rem}
+  .btn-timer{font-size:1.05rem;padding:.3rem .3rem}
+  .btn-reset-t{font-size:.95rem;padding:.3rem .8rem}
+  .rounds-display{padding:.24rem .7rem}
+  .rounds-count{font-size:1.4rem}
+  .rounds-label{font-size:.85rem}
+  .cfg-row{padding:.13rem .75rem}
+  .cfg-row label{font-size:.85rem}
+  .cfg-input{font-size:.9rem;padding:3px 7px;width:74px}
+  .cfg-select{font-size:.8rem;padding:3px 7px;width:170px}
+  .end-workout-btn{font-size:.95rem;padding:.28rem}
+  .panel-title{font-size:.75rem}
+  .gym-logo{width:140px;height:140px}
+  .dl{font-size:1.2rem}
+  .dt{font-size:.9rem}
+  .dtype{font-size:.8rem}
 }
 </style>
 </head>
@@ -1210,14 +1283,16 @@ function renderWorkout(){
   for(var i=0;i<movements.length;i++){
     var mv=movements[i];
     if(mv==='---'){
-      rows+='<div class="ex-row divider"><span></span></div>';
+      rows+='<div class="ex-group"><div class="ex-row divider"><span></span></div></div>';
     } else {
-      rows+='<div class="ex-row"><span class="ex-text">'+(isDone?'<s>'+mv+'</s>':mv)+'</span></div>';
-      // Check for running routes
+      var grp='<div class="ex-row"><span class="ex-text">'+(isDone?'<s>'+mv+'</s>':mv)+'</span></div>';
+      // Check for running routes — kept inside the group so a column break
+      // can never separate a route note from its movement
       var routes=getRouteForText(mv);
       if(routes.length>0){
-        rows+='<div class="route-note">'+routes[0]+'</div>';
+        grp+='<div class="route-note">'+routes[0]+'</div>';
       }
+      rows+='<div class="ex-group">'+grp+'</div>';
     }
   }
 
@@ -1250,8 +1325,37 @@ function renderWorkout(){
       (isDone?'✓ WORKOUT COMPLETE — TAP TO UNDO':'MARK WORKOUT DONE')+
     '</button>';
 
+  fitWorkout();
   autoConfigTimer(fmt,fmt==='rft'?0:fmtVal,fmt==='rft'?fmtVal:0);
 }
+
+// Long workouts would otherwise scroll while half the panel sits empty.
+// Measure the rendered list and spill it into 2 (then 3) columns until the
+// whole workout is visible at once. Narrow screens always stay single column.
+function fitWorkout(){
+  var panel=document.getElementById('workoutPanel');
+  if(!panel)return;
+  var list=panel.querySelector('.ex-list');
+  if(!list)return;
+  list.classList.remove('two-col','three-col');
+  if(window.innerWidth<1100)return;
+  var overflows=function(){return panel.scrollHeight>panel.clientHeight+2;};
+  if(!overflows())return;
+  list.classList.add('two-col');
+  if(!overflows())return;
+  list.classList.remove('two-col');
+  list.classList.add('three-col');
+  if(!overflows())return;
+  // still too tall (very long chipper) — two columns reads better than three
+  list.classList.remove('three-col');
+  list.classList.add('two-col');
+}
+
+var _fitTimer=null;
+window.addEventListener('resize',function(){
+  clearTimeout(_fitTimer);
+  _fitTimer=setTimeout(fitWorkout,150);
+});
 
 function toggleNotes(btn){
   var key = btn.dataset.key;
